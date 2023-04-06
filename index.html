@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<html>
+
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+
+    <script language="javascript" type="text/javascript">
+
+        var ws = null;
+
+        function clear() {
+            const myContainer = document.getElementById("log");
+            myContainer.innerHTML = '';
+        }
+
+        function add_content(data) {
+            const myContainer = document.getElementById("log");
+            text_data = JSON.parse(data);
+
+            text_data.forEach(item => {
+                let article = document.createElement('div');
+                article.className = "article";
+                if (myContainer.children.length) {
+                    myContainer.prepend(article);
+                } else {
+                    myContainer.append(article);
+                }
+
+                let title = document.createElement('div');
+                title.className = "title";
+                let text = document.createElement('div');
+                text.className = "text";
+                article.prepend(title);
+                title.innerHTML = `${item['title']}`;
+                article.append(text);
+                text.innerHTML = `${item['text']}`;
+            });
+
+        }
+
+        function connect() {
+            disconnect();
+            var wsUri = (window.location.protocol == 'https:' && 'wss://' || 'ws://') + window.location.host + '/ws';
+            ws = new WebSocket(wsUri);
+            console.log('Connecting...');
+            ws.onopen = function () {
+                console.log('Connected.');
+
+            };
+            ws.onmessage = function (e) {
+                console.log(e.data)
+                add_content(e.data)
+
+            };
+            ws.onclose = function () {
+                console.log('Disconnected.');
+                ws = null;
+
+            };
+        }
+        function disconnect() {
+            if (ws != null) {
+                console.log('Disconnecting...');
+                ws.close();
+                ws = null;
+
+            }
+        }
+
+    </script>
+</head>
+
+<body onload="connect();">
+    <div id="log" style="width:20em;height:15em;overflow:auto">
+    </div>
+</body>
+
+</html>
